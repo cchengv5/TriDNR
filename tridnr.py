@@ -65,6 +65,10 @@ class TriDNR:
         d2v = net.trainDoc2Vec(alldata, workers=workers, size=size, dm=dm, passes=passes, min_count=min_count)
 
         raw_walks, netwalks = net.getdeepwalks(directory, number_walks=20, walk_length=8)
+
+        print("raw network data is: ", alldata[0:10])
+        print("new network data is: ", netwalks[0:10])
+
         w2v = net.trainWord2Vec(raw_walks, buildvoc=1, passes=passes, size=size, workers=workers)
 
         if train_size > 0: #Print out the initial results
@@ -91,14 +95,14 @@ class TriDNR:
            # destModel.reset_weights()
 
             doctags = orignialModel.docvecs.doctags
-            keys = destModel.vocab.keys()
+            keys = destModel.wv.vocab.keys()
             for key in keys:
                 if not doctags.__contains__(key):
                     continue
 
                 index = doctags[key].index # Doc2Vec index
-                id = destModel.vocab[key].index # Word2Vec index
-                destModel.syn0[id] = (1-weight) * destModel.syn0[id] + weight * orignialModel.docvecs.doctag_syn0[index]
+                id = destModel.wv.vocab[key].index # Word2Vec index
+                destModel.wv.syn0[id] = (1-weight) * destModel.wv.syn0[id] + weight * orignialModel.docvecs.doctag_syn0[index]
 
                 destModel.syn0_lockf[id] = orignialModel.docvecs.doctag_syn0_lockf[index]
         else: # orignialModel is a word2vec instance only
@@ -118,7 +122,9 @@ class TriDNR:
     def train(self, d2v, w2v, directory, alldata, passes=10, weight=0.9):
 
         raw_walks, walks = net.getdeepwalks(directory, number_walks=20, walk_length=10)
-        for i in xrange(passes):
+        print("raw_walks: ", raw_walks[0:5])
+        print("walks: ", walks[0:5])
+        for i in range(passes):
             print('Iterative Runing %d' % i)
             self.setWeights(d2v, w2v, weight=weight)
 

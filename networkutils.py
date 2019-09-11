@@ -1,5 +1,6 @@
 from collections import namedtuple
-from gensim.models.doc2vec import Doc2Vec, Word2Vec
+from gensim.models.doc2vec import Doc2Vec
+from gensim.models import Word2Vec
 from random import shuffle
 from deepwalk import graph
 import gensim
@@ -101,7 +102,11 @@ def getdeepwalks(dir, number_walks=50, walk_length=10, seed=1):
     networksentence = []
     raw_walks = []
     for i, x in enumerate(walks):
+        
         sentence = [gensim.utils.to_unicode(str(t)) for t in x]
+        if i == 0:
+            print("first walk is: ", x)
+            print("sentence is: ", sentence)
 
         s = NetworkSentence(sentence, [sentence[0]], None, 0) # label information is not used by random walk
         networksentence.append(s)
@@ -121,7 +126,7 @@ def trainDoc2Vec(doc_list=None, buildvoc=1, passes=20, dm=0,
         print('Iteration %d ....' % epoch)
         shuffle(doc_list)  # shuffling gets best results
 
-        model.train(doc_list)
+        model.train(doc_list, total_examples=model.corpus_count, epochs=model.epochs)
 
     return model
 
@@ -139,7 +144,7 @@ def trainWord2Vec(doc_list=None, buildvoc=1, passes=20, sg=1, size=100,
         print('Iteration %d ....' % epoch)
         shuffle(doc_list)  # shuffling gets best results
 
-        model.train(doc_list)
+        model.train(doc_list, total_examples=model.corpus_count, epochs=model.epochs)
 
     return model
 
